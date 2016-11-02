@@ -1,5 +1,5 @@
+import django
 from optparse import make_option
-
 from django.core.management.base import BaseCommand, CommandError
 
 try:
@@ -27,16 +27,29 @@ class Command(BaseCommand):
     EXISTING_HISTORY_FOUND = "Existing history found, skipping model"
     INVALID_MODEL_ARG = "An invalid model was specified"
 
-    option_list = BaseCommand.option_list + (
-        make_option(
-            '--auto',
-            action='store_true',
-            dest='auto',
-            default=False,
-            help="Automatically search for models with the "
-                 "HistoricalRecords field type",
-        ),
-    )
+    if django.VERSION >= (1, 8):
+        def add_arguments(self, parser):
+            parser.add_argument(
+                '--auto',
+                action='store_true',
+                dest='auto',
+                default=False,
+                help="Automatically search for models with the "
+                     "HistoricalRecords field type",
+             )
+    else:
+        option_list = BaseCommand.option_list + (
+            make_option(
+                '--auto',
+                action='store_true',
+                dest='auto',
+                default=False,
+                help="Automatically search for models with the "
+                     "HistoricalRecords field type",
+            )
+            ,
+        )
+
 
     def handle(self, *args, **options):
         to_process = set()
