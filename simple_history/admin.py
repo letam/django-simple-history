@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import django
 from django import http
 from django.core.exceptions import PermissionDenied
 from django.conf.urls import url
@@ -75,8 +76,12 @@ class SimpleHistoryAdmin(admin.ModelAdmin):
             'admin_user_view': admin_user_view
         }
         context.update(extra_context or {})
-        return render(request, template_name=self.object_history_template,
-                      dictionary=context, current_app=request.current_app)
+        if django.VERSION >= (1, 8):
+            return render(request, template_name=self.object_history_template,
+                          context=context)
+        else:
+            return render(request, template_name=self.object_history_template,
+                          dictionary=context, current_app=request.current_app)
 
     def response_change(self, request, obj):
         if '_change_history' in request.POST and SIMPLE_HISTORY_EDIT:
@@ -178,8 +183,12 @@ class SimpleHistoryAdmin(admin.ModelAdmin):
             'save_on_top': self.save_on_top,
             'root_path': getattr(self.admin_site, 'root_path', None),
         }
-        return render(request, template_name=self.object_history_form_template,
-                      dictionary=context, current_app=request.current_app)
+        if django.VERSION >= (1, 8):
+            return render(request, template_name=self.object_history_form_template,
+                          context=context)
+        else:
+            return render(request, template_name=self.object_history_form_template,
+                          dictionary=context, current_app=request.current_app)
 
     def save_model(self, request, obj, form, change):
         """Set special model attribute to user for reference after save"""
